@@ -123,7 +123,7 @@ bash scripts/check-app.sh          # 签名、启动、临时 Rime 数据部署�
 # debug：bash scripts/build-app.sh debug
 ```
 
-产物为 `dist/Squirrel.app`，包含图形设置窗口、词库与 Lua 插件，采用本地 ad-hoc 签名。安装时将它放入 `/Library/Input Methods/`，再注销登录，在系统「键盘 → 输入法」中添加鼠须管；如已安装其他 Squirrel，请先备份旧 app。构建过程不会安装 app 或修改 `~/Library/Rime`。已有用户自定义配置可覆盖内置方案，需在实际输入中确认。
+产物为 `dist/Squirrel.app`，包含图形设置窗口、词库与 Lua 插件，采用本地 ad-hoc 签名。安装前同时检查 `/Library/Input Methods/` 和 `~/Library/Input Methods/`：只能保留一份 `Squirrel.app`，两处的相同输入源标识会冲突。备份旧 app 时移到两个输入法目录以外；本项目使用 `/Library/Input Methods/Squirrel.app`，请在该位置替换旧版，不要另装到用户目录。首次安装、清理重复注册或系统仍加载旧版时，注销并重新登录后再检查输入源；旧会话中不要反复增删重复条目。普通开发更新可先切换到 ABC，再退出并从安装路径启动新版，验证实际运行版本及打字是否正常；无需把每次注销作为固定步骤，但不能保证所有 macOS 版本都能免注销更新。构建过程不会安装 app 或修改 `~/Library/Rime`。已有用户自定义配置可覆盖内置方案，需在实际输入中确认。
 
 此入口用于本地开发；旧 `make release/package` 和 GitHub 发布工作流仍保留 Xcode 路径。尚未迁移公证、通用二进制和独立更新渠道。构建包关闭自动检查更新，手动检查仍连接原上游。
 
