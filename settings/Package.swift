@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.0
 // TriFectaSettings — 微信输入法风格的 TriFecta（Rime/Squirrel）图形化设置窗口。
 // 构建：swift build -c release（Command Line Tools 环境即可构建，详见 scripts/build-app.sh）
 // Xcode 用户：直接打开 settings/TriFectaSettings.xcodeproj（由 project.yml 经 xcodegen 生成）
@@ -26,7 +26,8 @@ let package = Package(
         .executableTarget(
             name: "TriFectaSettings",
             dependencies: ["TriFectaSettingsCore"],
-            path: "Sources/TriFectaSettings"
+            path: "Sources/TriFectaSettings",
+            exclude: ["Resources"]
         ),
         // 冒烟 CLI（dump/set/deploy，供测试与 CI）
         .executableTarget(
@@ -39,5 +40,6 @@ let package = Package(
             dependencies: ["TriFectaSettingsCore"],
             path: "Tests/TriFectaSettingsTests"
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )

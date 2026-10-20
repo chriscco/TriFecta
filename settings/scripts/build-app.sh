@@ -13,24 +13,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if ! xcodebuild -version >/dev/null 2>&1; then
-  if [ -d "/Applications/Xcode-beta.app/Contents/Developer" ]; then
-    echo "==> 当前 xcode-select 未指向完整 Xcode，使用 Xcode-beta 工具链"
-    export DEVELOPER_DIR="/Applications/Xcode-beta.app/Contents/Developer"
-  else
-    echo "未找到可用的 Xcode 工具链（需要完整 Xcode 或 Xcode-beta）" >&2
-    exit 1
-  fi
-fi
-
 CONFIG="${1:-release}"
 ROOT="$(pwd)"
 SCRATCH="${SCT_SCRATCH:-/tmp/trifecta-settings-build-$(id -u)}"
-WORK="/tmp/TriFectaSettings-build-$(id -u)"
+WORK="$(mktemp -d /tmp/TriFectaSettings-build.XXXXXX)"
+trap 'rm -rf "$WORK"' EXIT
 STAGE="$WORK/TriFectaSettings.app"
 
-rm -rf "$WORK"
-mkdir -p "$WORK" "$STAGE/Contents/MacOS" "$STAGE/Contents/Resources"
+mkdir -p "$STAGE/Contents/MacOS" "$STAGE/Contents/Resources"
 
 swift build -c "$CONFIG" --scratch-path "$SCRATCH" >/dev/null
 BIN="$(swift build -c "$CONFIG" --scratch-path "$SCRATCH" --show-bin-path)/TriFectaSettings"
@@ -38,12 +28,7 @@ BIN="$(swift build -c "$CONFIG" --scratch-path "$SCRATCH" --show-bin-path)/TriFe
 cp "$BIN" "$STAGE/Contents/MacOS/TriFectaSettings"
 cp "Sources/TriFectaSettings/Resources/Info.plist" "$STAGE/Contents/Info.plist"
 
-ICON_SRC="/Library/Input Methods/Squirrel.app/Contents/Resources/RimeIcon.icns"
-if [ -f "$ICON_SRC" ]; then
-  cp "$ICON_SRC" "$STAGE/Contents/Resources/AppIcon.icns"
-else
-  echo "警告：未找到输入法包图标（/Library/Input Methods/Squirrel.app），跳过 AppIcon"
-fi
+cp "$ROOT/../resources/RimeIcon.icns" "$STAGE/Contents/Resources/AppIcon.icns"
 
 # 在 /tmp 内完成签名（远离 iCloud 属性戳）
 xattr -cr "$STAGE" 2>/dev/null || true
