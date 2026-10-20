@@ -110,6 +110,25 @@ echo ">>> 完成"
 
 ## 从源码构建
 
+### 本地 CLT 构建（Swift 6 工具链）
+
+无需安装完整 Xcode。使用 Swift 6+ Command Line Tools、macOS SDK、Python 3；测试还需要 Lua（`brew install lua`）。主程序和设置应用暂时保留 Swift 5 语言兼容模式，设置包使用 Swift tools 6.0 和 Swift Testing。
+
+当前入口复用已准备的依赖：`librime/src` 头文件、`lib/librime.1.dylib` 与 `lib/rime-plugins`、`Frameworks/Sparkle.framework`、`bin/rime_deployer` / `rime_dict_manager` / `rime-install`。本次验证使用 librime 1.17.0、Sparkle 2.6.2。干净 checkout 尚需准备这些依赖；旧 `action-install.sh` 还会覆盖方案数据，不要直接对有配置改动的工作区运行。
+
+```bash
+make test                          # 26 个 Swift 测试、资源测试和 Lua 回归
+make clt                           # 当前机器架构的 release app
+bash scripts/check-app.sh          # 签名、启动、临时 Rime 数据部署及输入回归
+# debug：bash scripts/build-app.sh debug
+```
+
+产物为 `dist/Squirrel.app`，包含图形设置窗口、词库与 Lua 插件，采用本地 ad-hoc 签名。安装前同时检查 `/Library/Input Methods/` 和 `~/Library/Input Methods/`：只能保留一份 `Squirrel.app`，两处的相同输入源标识会冲突。备份旧 app 时移到两个输入法目录以外；本项目使用 `/Library/Input Methods/Squirrel.app`，请在该位置替换旧版，不要另装到用户目录。首次安装、清理重复注册或系统仍加载旧版时，注销并重新登录后再检查输入源；旧会话中不要反复增删重复条目。普通开发更新可先切换到 ABC，再退出并从安装路径启动新版，验证实际运行版本及打字是否正常；无需把每次注销作为固定步骤，但不能保证所有 macOS 版本都能免注销更新。构建过程不会安装 app 或修改 `~/Library/Rime`。已有用户自定义配置可覆盖内置方案，需在实际输入中确认。
+
+此入口用于本地开发；旧 `make release/package` 和 GitHub 发布工作流仍保留 Xcode 路径。尚未迁移公证、通用二进制和独立更新渠道。构建包关闭自动检查更新，手动检查仍连接原上游。
+
+### 原 Xcode 构建路径
+
 TriFecta 基于 [rime/squirrel](https://github.com/rime/squirrel)（GPL-3.0）定制。
 
 - 环境：**Xcode**（14+，macOS 26 beta 亦可）、**cmake**（`brew install cmake`，若手动编译 librime）、**Rime / Squirrel 源码与依赖**

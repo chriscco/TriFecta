@@ -34,3 +34,6 @@ HANDOFF.md
 
 # --- Editor / IDE ---
 .vscode/
+
+# Python resource/test helpers
+__pycache__/

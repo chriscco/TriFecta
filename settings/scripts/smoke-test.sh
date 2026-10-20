@@ -8,22 +8,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# 先选定工具链（CLT 下 swift-package 缺失 build-server framework，必须用完整 Xcode）
-export DEVELOPER_DIR="${DEVELOPER_DIR:-}"
-if ! xcodebuild -version >/dev/null 2>&1; then
-  if [ -d "/Applications/Xcode-beta.app/Contents/Developer" ]; then
-    export DEVELOPER_DIR="/Applications/Xcode-beta.app/Contents/Developer"
-  else
-    echo "未找到可用的 Xcode 工具链" >&2
-    exit 1
-  fi
-fi
-
 if [ "${SCT_SKIP_BUILD:-0}" != "1" ]; then
-  swift test --scratch-path .build-test >/dev/null 2>&1 || swift build --scratch-path .build-test >/dev/null
+  bash scripts/test.sh --scratch-path .build-test
 fi
 
-BIN="$(swift build -c debug --scratch-path .build-test --show-bin-path 2>/dev/null || swift build --scratch-path .build-test --show-bin-path)/TriFectaSettingsCLI"
+BIN="$(swift build -c debug --scratch-path .build-test --show-bin-path)/TriFectaSettingsCLI"
 [ -x "$BIN" ] || { echo "CLI 未构建"; exit 1; }
 
 RIME=~/Library/Rime

@@ -194,3 +194,13 @@ clean-deps:
 	$(MAKE) -C librime clean
 	rm -rf librime/dist > /dev/null 2>&1 || true
 	$(MAKE) clean-sparkle
+
+# Local Swift 6 / Command Line Tools workflow (no full Xcode).
+.PHONY: clt test
+clt:
+	bash scripts/build-app.sh release
+
+test:
+	bash settings/scripts/test.sh
+	python3 -m unittest discover -s tests
+	lua tests/hyphen_priority_test.lua

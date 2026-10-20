@@ -17,14 +17,18 @@ settings/
 │   │                             #   RimeSchemas、EffectiveModel、SettingsRepository、Deployer
 │   ├── TriFectaSettings/         # SwiftUI app（输入/外观/界面/快捷键/同步/关于 6 个页面）
 │   └── TriFectaSettingsCLI/      # 冒烟 CLI（dump/set/deploy/sync/restore/path）
-├── Tests/TriFectaSettingsTests/  # swift test（27 个用例）
+├── Tests/TriFectaSettingsTests/  # Swift Testing（26 个用例）
 └── scripts/
     ├── build-app.sh              # swift build → 组装 TriFectaSettings.app（ad-hoc 签名）
+    ├── test.sh                   # CLT / Xcode 均可运行，支持 swift test 参数
     ├── install.sh                # 安装进输入法包 Contents/MacOS/（WeType 同款布局）
     └── smoke-test.sh             # 全流程冒烟（真实 ~/Library/Rime + 部署触发）
 ```
 
 ## 构建
+
+需要 Swift 6.0 或更新的工具链（`swift --version`）；仅安装 Command Line Tools 即可。
+包使用 Swift 5 语言模式，暂不引入 Swift 6 严格并发迁移。
 
 ```bash
 # 方式一：脚本（推荐，Command Line Tools 环境即可）
@@ -37,12 +41,14 @@ xcodebuild -project settings/TriFectaSettings.xcodeproj \
   -scheme TriFectaSettings -configuration Release build
 
 # 单元测试
-cd settings && swift test
+bash settings/scripts/test.sh
+# 可转发 SwiftPM 参数，例如：
+bash settings/scripts/test.sh --filter YamlLineEditorTests
 ```
 
 > 注：若仓库位于 iCloud 同步目录（如 ~/Documents），xcodebuild/xctest 的代码签名会
 > 因 `com.apple.fileprovider` 扩展属性失败——SwiftPM 时用独立 scratch 路径：
-> `swift test --scratch-path /tmp/tsbuild`（build-app.sh 已内置该处理）。
+> `bash settings/scripts/test.sh --scratch-path /tmp/tsbuild`（build-app.sh 已内置该处理）。
 
 ## 安装
 
@@ -87,6 +93,4 @@ bash settings/scripts/install.sh
 
 - 「检查更新」打开 GitHub Releases 页：Sparkle 更新器只在输入法进程内，设置 app 不再引副本。
 - 颜色拾色器仅编辑 RGB；透明度固定 0.68（与内置三色一致，不暴露透明度滑杆）。
-- 输入法源码（sources/）改动无法在本机完整编译（无 Xcode + librime 源码），已用
-  swiftc typecheck（真实 librime 头文件 + Sparkle 最小桩）验证零错误；最终以
-  `make release` / GitHub Actions 编译为准。
+- `smoke-test.sh` 会暂时修改真实的 `~/Library/Rime` 配置并触发部署；日常验证优先运行使用临时目录的 `test.sh`。
